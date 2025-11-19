@@ -4,7 +4,7 @@ import { dataService } from '../services/dataService';
 import { Plus, Edit2, Trash2, LogOut, Save, X, Car, ArrowLeft } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
-export default function AdminView() {
+export default function BoardView() {
     const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');

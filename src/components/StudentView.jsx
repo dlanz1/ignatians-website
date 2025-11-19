@@ -73,6 +73,21 @@ export default function StudentView() {
             )}
 
             <header className="header">
+                <div className="container header-content">
+                    <div className="logo">
+                        <img src={logo} alt="Ignatians Logo" style={{ height: '40px', borderRadius: '50%' }} />
+                        <span style={{ color: 'var(--color-maroon)' }}>IGNATIANS</span>
+                        <span style={{ color: 'var(--color-navy)', fontWeight: 400 }}>SERVICE</span>
+                    </div>
+                    <button
+                        onClick={() => navigate('/board')}
+                        className="btn btn-outline"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                    >
+                        <Lock size={16} />
+                        <span>Board</span>
+                    </button>
+                </div>
             </header>
 
             <main className="container">

@@ -152,6 +152,7 @@ button {
   margin-top: 0.25rem;
   background-color: var(--bg-input);
   color: var(--text-main);
+  box-sizing: border-box;
 }
 
 .input:focus {

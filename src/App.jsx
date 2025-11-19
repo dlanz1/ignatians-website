@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import StudentView from './components/StudentView';
-import AdminView from './components/AdminView';
+import BoardView from './components/BoardView';
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <div className="app-container">
         <Routes>
           <Route path="/" element={<StudentView />} />
-          <Route path="/board" element={<AdminView />} />
+          <Route path="/board" element={<BoardView />} />
         </Routes>
 
         <footer style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-gray-500)', fontSize: '0.875rem' }}>
