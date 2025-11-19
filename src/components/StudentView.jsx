@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera } from 'lucide-react';
+import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera, ExternalLink } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
 export default function StudentView() {
@@ -9,6 +9,8 @@ export default function StudentView() {
     const [placements, setPlacements] = useState([]);
     const [notification, setNotification] = useState(null);
     const [selectedPlacement, setSelectedPlacement] = useState(null);
+    const [expandedPlacement, setExpandedPlacement] = useState(null);
+    const [isClosing, setIsClosing] = useState(false);
     const [studentName, setStudentName] = useState('');
     const [isDriver, setIsDriver] = useState(false);
     const [latestGlobalNotif, setLatestGlobalNotif] = useState(null);
@@ -27,6 +29,18 @@ export default function StudentView() {
         setLatestGlobalNotif(notif);
     };
 
+    const handleCardClick = (placement) => {
+        setExpandedPlacement(placement);
+    };
+
+    const handleCloseModal = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setExpandedPlacement(null);
+            setIsClosing(false);
+        }, 300); // Match the fadeOut animation duration
+    };
+
     const handleSignUpClick = (placement) => {
         setSelectedPlacement(placement);
         setStudentName('');
@@ -43,6 +57,7 @@ export default function StudentView() {
             showNotification('success', result.message);
             loadPlacements();
             setSelectedPlacement(null);
+            setExpandedPlacement(null);
         } else {
             showNotification('error', result.message);
         }
@@ -105,10 +120,11 @@ export default function StudentView() {
             <main className="container">
                 <div className="hero">
                     <h1>Weekly Service Sign-ups</h1>
-                    <p>Select a placement below to sign up. Thank you for your service!</p>
+                    <p>Click on a placement to learn more and sign up. Thank you for your service!</p>
                 </div>
 
-                <div className="grid">
+                {/* Grid Layout */}
+                <div className="placement-grid">
                     {placements.length === 0 ? (
                         <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 2rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
@@ -124,74 +140,139 @@ export default function StudentView() {
                         placements.map(placement => {
                             const signedUpCount = placement.signUps ? placement.signUps.length : 0;
                             const isFull = signedUpCount >= placement.capacity;
-                            const driverFound = placement.signUps && placement.signUps.some(s => s.isDriver);
 
                             return (
-                                <div key={placement.id} className="card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                        <h3 style={{ margin: 0, color: 'var(--color-maroon)' }}>{placement.name}</h3>
-                                        <span className={`badge ${isFull ? 'badge-gold' : ''}`} style={{ backgroundColor: isFull ? 'var(--color-gray-200)' : 'var(--color-navy)', color: isFull ? 'var(--color-gray-600)' : 'white' }}>
-                                            {isFull ? 'FULL' : `${placement.capacity - signedUpCount} spots left`}
-                                        </span>
+                                <div
+                                    key={placement.id}
+                                    className="placement-card-compact"
+                                    onClick={() => handleCardClick(placement)}
+                                >
+                                    <div className="placement-card-image">
+                                        <img src={placement.image} alt={placement.name} />
+                                        <div className="placement-card-overlay">
+                                            <span className="placement-learn-more">Click to Learn More</span>
+                                        </div>
                                     </div>
-
-                                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{placement.description}</p>
-
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                                            <Calendar size={18} style={{ color: 'var(--color-maroon)' }} />
-                                            <span>{placement.day} • {placement.time}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                                            <MapPin size={18} style={{ color: 'var(--color-maroon)' }} />
-                                            <span>{placement.location}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                                            <Car size={18} className={driverFound ? "" : ""} style={{ color: driverFound ? 'var(--color-gold)' : 'var(--color-maroon)' }} />
-                                            <span style={{ color: driverFound ? 'var(--color-gold)' : 'inherit', fontWeight: driverFound ? 600 : 400 }}>
-                                                {driverFound ? 'Driver Found' : 'Driver Needed'}
+                                    <div className="placement-card-content">
+                                        <h3>{placement.name}</h3>
+                                        <div className="placement-card-meta">
+                                            <span className="placement-card-day">{placement.day}</span>
+                                            <span className={`placement-card-badge ${isFull ? 'full' : ''}`}>
+                                                {isFull ? 'FULL' : `${placement.capacity - signedUpCount} spots`}
                                             </span>
                                         </div>
                                     </div>
-
-                                    {/* Sign-up List (Code Block Style) */}
-                                    <div style={{ marginBottom: '1.5rem' }}>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
-                                            Who's Going:
-                                        </div>
-                                        <div className="code-block">
-                                            {placement.signUps && placement.signUps.length > 0 ? (
-                                                placement.signUps.map((s, idx) => (
-                                                    <span key={idx} className="code-line">
-                                                        <span style={{ color: 'var(--color-maroon)' }}>{idx + 1}.</span> {s.name}
-                                                        {s.isDriver && <span style={{ color: 'var(--color-gold)', marginLeft: '0.5rem' }}>[DRIVER]</span>}
-                                                    </span>
-                                                ))
-                                            ) : (
-                                                <span className="text-light" style={{ fontStyle: 'italic' }}>// No sign-ups yet</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        className={`btn ${isFull ? 'btn-outline' : 'btn-primary'}`}
-                                        style={{ width: '100%', marginTop: 'auto' }}
-                                        disabled={isFull}
-                                        onClick={() => handleSignUpClick(placement)}
-                                    >
-                                        {isFull ? 'Placement Full' : 'Sign Up'}
-                                    </button>
                                 </div>
                             );
                         })
                     )}
                 </div>
-            </main >
+            </main>
+
+            {/* Expanded Modal */}
+            {expandedPlacement && (
+                <div className={`placement-modal-overlay ${isClosing ? 'closing' : ''}`} onClick={handleCloseModal}>
+                    <div className={`placement-modal-content ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
+                        <button className="placement-modal-close" onClick={handleCloseModal}>
+                            <X size={24} />
+                        </button>
+
+                        <div className="placement-modal-image">
+                            <img src={expandedPlacement.image} alt={expandedPlacement.name} />
+                        </div>
+
+                        <div className="placement-modal-body">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                <h2 style={{ margin: 0, color: 'var(--color-maroon)' }}>{expandedPlacement.name}</h2>
+                                <span className={`badge ${expandedPlacement.signUps?.length >= expandedPlacement.capacity ? 'badge-gray' : ''}`}
+                                    style={{
+                                        backgroundColor: expandedPlacement.signUps?.length >= expandedPlacement.capacity ? 'var(--color-gray-200)' : 'var(--color-navy)',
+                                        color: expandedPlacement.signUps?.length >= expandedPlacement.capacity ? 'var(--color-gray-600)' : 'white'
+                                    }}>
+                                    {expandedPlacement.signUps?.length >= expandedPlacement.capacity
+                                        ? 'FULL'
+                                        : `${expandedPlacement.capacity - (expandedPlacement.signUps?.length || 0)} spots left`}
+                                </span>
+                            </div>
+
+                            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                                {expandedPlacement.detailedDescription}
+                            </p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                    <Calendar size={18} style={{ color: 'var(--color-maroon)' }} />
+                                    <span>{expandedPlacement.day} • {expandedPlacement.time}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'start', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                    <MapPin size={18} style={{ color: 'var(--color-maroon)', marginTop: '2px', flexShrink: 0 }} />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+                                        <span>{expandedPlacement.address || expandedPlacement.location}</span>
+                                        {expandedPlacement.mapLink && (
+                                            <a
+                                                href={expandedPlacement.mapLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    color: 'var(--color-maroon)',
+                                                    textDecoration: 'none',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 600,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.25rem'
+                                                }}
+                                            >
+                                                <span>Get Directions</span>
+                                                <ExternalLink size={14} />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                    <Car size={18} style={{ color: expandedPlacement.signUps?.some(s => s.isDriver) ? 'var(--color-gold)' : 'var(--color-maroon)' }} />
+                                    <span style={{ color: expandedPlacement.signUps?.some(s => s.isDriver) ? 'var(--color-gold)' : 'inherit', fontWeight: expandedPlacement.signUps?.some(s => s.isDriver) ? 600 : 400 }}>
+                                        {expandedPlacement.signUps?.some(s => s.isDriver) ? 'Driver Found' : 'Driver Needed'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Sign-up List */}
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
+                                    Who's Going:
+                                </div>
+                                <div className="code-block">
+                                    {expandedPlacement.signUps && expandedPlacement.signUps.length > 0 ? (
+                                        expandedPlacement.signUps.map((s, idx) => (
+                                            <span key={idx} className="code-line">
+                                                <span style={{ color: 'var(--color-maroon)' }}>{idx + 1}.</span> {s.name}
+                                                {s.isDriver && <span style={{ color: 'var(--color-gold)', marginLeft: '0.5rem' }}>[DRIVER]</span>}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-light" style={{ fontStyle: 'italic' }}>// No sign-ups yet</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            <button
+                                className={`btn ${expandedPlacement.signUps?.length >= expandedPlacement.capacity ? 'btn-outline' : 'btn-primary'}`}
+                                style={{ width: '100%' }}
+                                disabled={expandedPlacement.signUps?.length >= expandedPlacement.capacity}
+                                onClick={() => handleSignUpClick(expandedPlacement)}
+                            >
+                                {expandedPlacement.signUps?.length >= expandedPlacement.capacity ? 'Placement Full' : 'Sign Up'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {selectedPlacement && (
                 <div style={{
                     position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200
                 }}>
                     <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -244,31 +325,28 @@ export default function StudentView() {
                         </form>
                     </div>
                 </div>
-            )
-            }
+            )}
 
-            {
-                notification && (
-                    <div style={{
-                        position: 'fixed',
-                        bottom: '2rem',
-                        right: '2rem',
-                        backgroundColor: notification.type === 'success' ? 'var(--color-navy)' : '#ef4444',
-                        color: 'white',
-                        padding: '1rem 2rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        animation: 'slideIn 0.3s ease-out',
-                        zIndex: 1000
-                    }}>
-                        {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                        {notification.message}
-                    </div>
-                )
-            }
-        </div >
+            {notification && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '2rem',
+                    right: '2rem',
+                    backgroundColor: notification.type === 'success' ? 'var(--color-navy)' : '#ef4444',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    animation: 'slideIn 0.3s ease-out',
+                    zIndex: 1000
+                }}>
+                    {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                    {notification.message}
+                </div>
+            )}
+        </div>
     );
 }
