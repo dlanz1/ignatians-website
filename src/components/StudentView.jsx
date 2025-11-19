@@ -109,69 +109,82 @@ export default function StudentView() {
                 </div>
 
                 <div className="grid">
-                    {placements.map(placement => {
-                        const signedUpCount = placement.signUps ? placement.signUps.length : 0;
-                        const isFull = signedUpCount >= placement.capacity;
-                        const driverFound = placement.signUps && placement.signUps.some(s => s.isDriver);
+                    {placements.length === 0 ? (
+                        <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 2rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                <AlertCircle size={48} style={{ color: 'var(--color-maroon)' }} />
+                                <h3 style={{ margin: 0, color: 'var(--color-navy)' }}>No Placements Available</h3>
+                                <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: 0 }}>
+                                    There are currently no placements available for signup this week.
+                                    Please check back later or contact the board if you have any questions.
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        placements.map(placement => {
+                            const signedUpCount = placement.signUps ? placement.signUps.length : 0;
+                            const isFull = signedUpCount >= placement.capacity;
+                            const driverFound = placement.signUps && placement.signUps.some(s => s.isDriver);
 
-                        return (
-                            <div key={placement.id} className="card">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                    <h3 style={{ margin: 0, color: 'var(--color-maroon)' }}>{placement.name}</h3>
-                                    <span className={`badge ${isFull ? 'badge-gold' : ''}`} style={{ backgroundColor: isFull ? 'var(--color-gray-200)' : 'var(--color-navy)', color: isFull ? 'var(--color-gray-600)' : 'white' }}>
-                                        {isFull ? 'FULL' : `${placement.capacity - signedUpCount} spots left`}
-                                    </span>
-                                </div>
-
-                                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{placement.description}</p>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                                        <Calendar size={18} style={{ color: 'var(--color-maroon)' }} />
-                                        <span>{placement.day} • {placement.time}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                                        <MapPin size={18} style={{ color: 'var(--color-maroon)' }} />
-                                        <span>{placement.location}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                                        <Car size={18} className={driverFound ? "" : ""} style={{ color: driverFound ? 'var(--color-gold)' : 'var(--color-maroon)' }} />
-                                        <span style={{ color: driverFound ? 'var(--color-gold)' : 'inherit', fontWeight: driverFound ? 600 : 400 }}>
-                                            {driverFound ? 'Driver Found' : 'Driver Needed'}
+                            return (
+                                <div key={placement.id} className="card">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                        <h3 style={{ margin: 0, color: 'var(--color-maroon)' }}>{placement.name}</h3>
+                                        <span className={`badge ${isFull ? 'badge-gold' : ''}`} style={{ backgroundColor: isFull ? 'var(--color-gray-200)' : 'var(--color-navy)', color: isFull ? 'var(--color-gray-600)' : 'white' }}>
+                                            {isFull ? 'FULL' : `${placement.capacity - signedUpCount} spots left`}
                                         </span>
                                     </div>
-                                </div>
 
-                                {/* Sign-up List (Code Block Style) */}
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <div style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
-                                        Who's Going:
-                                    </div>
-                                    <div className="code-block">
-                                        {placement.signUps && placement.signUps.length > 0 ? (
-                                            placement.signUps.map((s, idx) => (
-                                                <span key={idx} className="code-line">
-                                                    <span style={{ color: 'var(--color-maroon)' }}>{idx + 1}.</span> {s.name}
-                                                    {s.isDriver && <span style={{ color: 'var(--color-gold)', marginLeft: '0.5rem' }}>[DRIVER]</span>}
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-light" style={{ fontStyle: 'italic' }}>// No sign-ups yet</span>
-                                        )}
-                                    </div>
-                                </div>
+                                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{placement.description}</p>
 
-                                <button
-                                    className={`btn ${isFull ? 'btn-outline' : 'btn-primary'}`}
-                                    style={{ width: '100%', marginTop: 'auto' }}
-                                    disabled={isFull}
-                                    onClick={() => handleSignUpClick(placement)}
-                                >
-                                    {isFull ? 'Placement Full' : 'Sign Up'}
-                                </button>
-                            </div>
-                        );
-                    })}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                            <Calendar size={18} style={{ color: 'var(--color-maroon)' }} />
+                                            <span>{placement.day} • {placement.time}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                            <MapPin size={18} style={{ color: 'var(--color-maroon)' }} />
+                                            <span>{placement.location}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                            <Car size={18} className={driverFound ? "" : ""} style={{ color: driverFound ? 'var(--color-gold)' : 'var(--color-maroon)' }} />
+                                            <span style={{ color: driverFound ? 'var(--color-gold)' : 'inherit', fontWeight: driverFound ? 600 : 400 }}>
+                                                {driverFound ? 'Driver Found' : 'Driver Needed'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Sign-up List (Code Block Style) */}
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
+                                            Who's Going:
+                                        </div>
+                                        <div className="code-block">
+                                            {placement.signUps && placement.signUps.length > 0 ? (
+                                                placement.signUps.map((s, idx) => (
+                                                    <span key={idx} className="code-line">
+                                                        <span style={{ color: 'var(--color-maroon)' }}>{idx + 1}.</span> {s.name}
+                                                        {s.isDriver && <span style={{ color: 'var(--color-gold)', marginLeft: '0.5rem' }}>[DRIVER]</span>}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="text-light" style={{ fontStyle: 'italic' }}>// No sign-ups yet</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        className={`btn ${isFull ? 'btn-outline' : 'btn-primary'}`}
+                                        style={{ width: '100%', marginTop: 'auto' }}
+                                        disabled={isFull}
+                                        onClick={() => handleSignUpClick(placement)}
+                                    >
+                                        {isFull ? 'Placement Full' : 'Sign Up'}
+                                    </button>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </main >
 
