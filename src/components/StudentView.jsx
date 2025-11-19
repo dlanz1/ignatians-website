@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera, ExternalLink, Loader } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
 export default function StudentView() {
@@ -13,19 +13,23 @@ export default function StudentView() {
     const [isClosing, setIsClosing] = useState(false);
     const [studentName, setStudentName] = useState('');
     const [isDriver, setIsDriver] = useState(false);
+    const [passengerCapacity, setPassengerCapacity] = useState(4);
     const [latestGlobalNotif, setLatestGlobalNotif] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        loadPlacements();
+        const unsubscribe = dataService.subscribeToPlacements((data) => {
+            setPlacements(data);
+            setIsLoading(false);
+        });
         loadLatestNotification();
+        return () => unsubscribe();
     }, []);
 
-    const loadPlacements = () => {
-        setPlacements(dataService.getPlacements());
-    };
+    // Removed loadPlacements as it is no longer needed with subscription
 
-    const loadLatestNotification = () => {
-        const notif = dataService.getLatestNotification();
+    const loadLatestNotification = async () => {
+        const notif = await dataService.getLatestNotification();
         setLatestGlobalNotif(notif);
     };
 
@@ -44,18 +48,20 @@ export default function StudentView() {
     const handleSignUpClick = (placement) => {
         setSelectedPlacement(placement);
         setStudentName('');
+        setStudentName('');
         setIsDriver(false);
+        setPassengerCapacity(4);
     };
 
-    const handleConfirmSignUp = (e) => {
+    const handleConfirmSignUp = async (e) => {
         e.preventDefault();
         if (!studentName.trim()) return;
 
-        const result = dataService.signUp(selectedPlacement.id, studentName, isDriver);
+        const result = await dataService.signUp(selectedPlacement.id, studentName, isDriver, passengerCapacity);
 
         if (result.success) {
             showNotification('success', result.message);
-            loadPlacements();
+            // loadPlacements(); // No longer needed, subscription handles it
             setSelectedPlacement(null);
             setExpandedPlacement(null);
         } else {
@@ -125,7 +131,11 @@ export default function StudentView() {
 
                 {/* Grid Layout */}
                 <div className="placement-grid">
-                    {placements.length === 0 ? (
+                    {isLoading ? (
+                        <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+                            <Loader className="spin" size={48} color="var(--color-maroon)" />
+                        </div>
+                    ) : placements.length === 0 ? (
                         <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 2rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                                 <AlertCircle size={48} style={{ color: 'var(--color-maroon)' }} />
@@ -312,6 +322,23 @@ export default function StudentView() {
                                     />
                                     <span>I can drive others to this placement</span>
                                 </label>
+                                {isDriver && (
+                                    <div style={{ marginTop: '0.75rem', marginLeft: '1.5rem' }}>
+                                        <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem', color: 'var(--color-gray-700)' }}>
+                                            Passenger Capacity (excluding you)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="10"
+                                            className="input"
+                                            value={passengerCapacity}
+                                            onChange={(e) => setPassengerCapacity(parseInt(e.target.value) || 0)}
+                                            style={{ width: '100px' }}
+                                            required={isDriver}
+                                        />
+                                    </div>
+                                )}
                                 {selectedPlacement.signUps.some(s => s.isDriver) && (
                                     <div style={{ fontSize: '0.8rem', color: 'var(--color-gold)', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
                                         A driver has already signed up.
