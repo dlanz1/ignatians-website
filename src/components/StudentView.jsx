@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock } from 'lucide-react';
+import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
 export default function StudentView() {
@@ -79,14 +79,26 @@ export default function StudentView() {
                         <span style={{ color: 'var(--color-maroon)' }}>IGNATIANS</span>
                         <span style={{ color: 'var(--color-navy)', fontWeight: 400 }}>SERVICE</span>
                     </div>
-                    <button
-                        onClick={() => navigate('/board')}
-                        className="btn btn-outline"
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                    >
-                        <Lock size={16} />
-                        <span>Board</span>
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <a
+                            href="https://join.photocircleapp.com/XBFVGAGWVV"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-outline"
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem', textDecoration: 'none' }}
+                        >
+                            <Camera size={16} />
+                            <span>PhotoCircle</span>
+                        </a>
+                        <button
+                            onClick={() => navigate('/board')}
+                            className="btn btn-outline"
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                        >
+                            <Lock size={16} />
+                            <span>Board</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
