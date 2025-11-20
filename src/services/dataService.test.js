@@ -65,3 +65,57 @@ describe('dataService.signUp', () => {
     expect(updateDoc).not.toHaveBeenCalled();
   });
 });
+
+describe('dataService.updatePlacement', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should NOT overwrite new signups with stale data if signUps is included in updatedFields', async () => {
+    const placementId = 'placement123';
+
+    // Initial state (what the BoardView sees when opening the modal)
+    // Empty signups
+    const staleSignUps = [];
+    const updatedFields = {
+      name: 'Updated Name',
+      capacity: 5,
+      signUps: staleSignUps // This is the stale data passed from BoardView
+    };
+
+    // Current state in DB (what happened while the modal was open)
+    // A student signed up!
+    const currentDbState = {
+      name: 'Old Name',
+      capacity: 5,
+      signUps: [{ name: 'New Student', isDriver: false }]
+    };
+
+    // Mock getDoc to return the CURRENT DB state (with the new student)
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => currentDbState
+    });
+
+    // Call updatePlacement with the STALE fields
+    await dataService.updatePlacement(placementId, updatedFields);
+
+    // Expect updateDoc to be called WITHOUT signUps in the payload
+    // This means we are asserting the bug is FIXED
+    expect(updateDoc).toHaveBeenCalledWith(
+      undefined,
+      expect.not.objectContaining({
+        signUps: expect.anything()
+      })
+    );
+
+    // Verify other fields ARE updated
+    expect(updateDoc).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        name: 'Updated Name',
+        capacity: 5
+      })
+    );
+  });
+});

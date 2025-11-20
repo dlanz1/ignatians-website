@@ -210,8 +210,10 @@ export const dataService = {
         await Promise.all(notificationPromises);
       }
 
-      await updateDoc(placementRef, updatedFields);
-      return { id, ...original, ...updatedFields };
+      // eslint-disable-next-line no-unused-vars
+      const { signUps, ...fieldsToUpdate } = updatedFields;
+      await updateDoc(placementRef, fieldsToUpdate);
+      return { id, ...original, ...fieldsToUpdate };
     }
     return null;
   },
