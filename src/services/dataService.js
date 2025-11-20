@@ -1,3 +1,13 @@
+/**
+ * Data service module for interacting with Firebase Firestore.
+ *
+ * This module provides a unified interface for all database operations, including
+ * fetching, adding, updating, and deleting placements, as well as handling
+ * student sign-ups and notifications.
+ *
+ * @module dataService
+ */
+
 import { db } from '../firebase';
 import {
   collection,
@@ -113,7 +123,16 @@ const initialData = {
   ]
 };
 
+/**
+ * Object containing methods for interacting with the data.
+ */
 export const dataService = {
+  /**
+   * Subscribes to real-time updates for placements.
+   *
+   * @param {Function} callback - A function that receives the list of placements.
+   * @returns {Function} An unsubscribe function to stop listening for updates.
+   */
   subscribeToPlacements: (callback) => {
     const q = query(collection(db, PLACEMENTS_COLLECTION));
     return onSnapshot(q, (snapshot) => {
@@ -122,6 +141,13 @@ export const dataService = {
     });
   },
 
+  /**
+   * Fetches all placements from the database.
+   * Seeds initial data if the collection is empty.
+   *
+   * @async
+   * @returns {Promise<Array<Object>>} A promise that resolves to an array of placement objects.
+   */
   getPlacements: async () => {
     const querySnapshot = await getDocs(collection(db, PLACEMENTS_COLLECTION));
 
@@ -140,12 +166,28 @@ export const dataService = {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   },
 
+  /**
+   * Adds a new placement to the database.
+   *
+   * @async
+   * @param {Object} placement - The placement object to add.
+   * @returns {Promise<Object>} A promise that resolves to the added placement object with its generated ID.
+   */
   addPlacement: async (placement) => {
     const newPlacement = { ...placement, signUps: [] };
     const docRef = await addDoc(collection(db, PLACEMENTS_COLLECTION), newPlacement);
     return { id: docRef.id, ...newPlacement };
   },
 
+  /**
+   * Updates an existing placement in the database.
+   * If capacity is reduced below current signups, it notifies affected students.
+   *
+   * @async
+   * @param {string} id - The ID of the placement to update.
+   * @param {Object} updatedFields - An object containing the fields to update.
+   * @returns {Promise<Object|null>} A promise that resolves to the updated placement object, or null if not found.
+   */
   updatePlacement: async (id, updatedFields) => {
     const placementRef = doc(db, PLACEMENTS_COLLECTION, id);
     const placementSnap = await getDoc(placementRef);
@@ -174,10 +216,28 @@ export const dataService = {
     return null;
   },
 
+  /**
+   * Deletes a placement from the database.
+   *
+   * @async
+   * @param {string} id - The ID of the placement to delete.
+   * @returns {Promise<void>} A promise that resolves when the deletion is complete.
+   */
   deletePlacement: async (id) => {
     await deleteDoc(doc(db, PLACEMENTS_COLLECTION, id));
   },
 
+  /**
+   * Signs a student up for a placement.
+   * Checks for capacity, duplicate signups, and driver availability rules.
+   *
+   * @async
+   * @param {string} placementId - The ID of the placement.
+   * @param {string} studentName - The name of the student.
+   * @param {boolean} isDriver - Whether the student is a driver.
+   * @param {number} [passengerCapacity=0] - The number of passengers the driver can take (if isDriver is true).
+   * @returns {Promise<Object>} A promise that resolves to an object with `success` boolean and `message` string.
+   */
   signUp: async (placementId, studentName, isDriver, passengerCapacity = 0) => {
     const placementRef = doc(db, PLACEMENTS_COLLECTION, placementId);
     const placementSnap = await getDoc(placementRef);
@@ -208,6 +268,13 @@ export const dataService = {
     return { success: true, message: 'Successfully signed up!' };
   },
 
+  /**
+   * Retrieves notifications for a specific user.
+   *
+   * @async
+   * @param {string} userName - The name of the user to fetch notifications for.
+   * @returns {Promise<Array<Object>>} A promise that resolves to an array of notification objects.
+   */
   getNotifications: async (userName) => {
     const q = query(
       collection(db, NOTIFICATIONS_COLLECTION),
@@ -217,6 +284,12 @@ export const dataService = {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   },
 
+  /**
+   * Retrieves the most recent notification from the system.
+   *
+   * @async
+   * @returns {Promise<Object|null>} A promise that resolves to the latest notification object, or null if none exist.
+   */
   getLatestNotification: async () => {
     const q = query(
       collection(db, NOTIFICATIONS_COLLECTION),
@@ -230,6 +303,12 @@ export const dataService = {
     return null;
   },
 
+  /**
+   * Verifies if the provided password matches any of the board passwords.
+   *
+   * @param {string} password - The password to check.
+   * @returns {boolean} True if the password is valid, false otherwise.
+   */
   checkBoardPassword: (password) => {
     return password === 'ignatians1929' || password === 'admin' || password === 'board';
   }

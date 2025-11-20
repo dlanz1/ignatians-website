@@ -1,3 +1,11 @@
+/**
+ * Test suite for the dataService module.
+ *
+ * This file contains unit tests for the dataService functions, specifically
+ * focusing on the signUp logic and duplicate prevention.
+ *
+ * @module dataService.test
+ */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { dataService } from './dataService';
