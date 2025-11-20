@@ -196,12 +196,13 @@ export const dataService = {
       return { success: false, message: 'A driver has already signed up for this placement.' };
     }
 
-    const isDuplicate = signUps.some(s => s.name.toLowerCase() === studentName.toLowerCase());
+    const trimmedName = studentName.trim();
+    const isDuplicate = signUps.some(s => s.name.trim().toLowerCase() === trimmedName.toLowerCase());
     if (isDuplicate) {
       return { success: false, message: 'You have already signed up for this placement.' };
     }
 
-    const newSignUps = [...signUps, { name: studentName, isDriver, passengerCapacity }];
+    const newSignUps = [...signUps, { name: trimmedName, isDriver, passengerCapacity }];
     await updateDoc(placementRef, { signUps: newSignUps });
 
     return { success: true, message: 'Successfully signed up!' };
