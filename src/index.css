@@ -393,12 +393,14 @@ button {
   justify-content: center;
   z-index: 100;
   padding: 1rem;
-  animation: fadeIn 0.3s ease-out;
   backdrop-filter: blur(4px);
+  /* Transition setup */
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
 }
 
-.placement-modal-overlay.closing {
-  animation: fadeOut 0.3s ease-out;
+.placement-modal-overlay.visible {
+  opacity: 1;
 }
 
 .placement-modal-content {
@@ -409,12 +411,16 @@ button {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.3);
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  /* Transition setup */
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.placement-modal-content.closing {
-  animation: slideDown 0.3s cubic-bezier(0.4, 0, 1, 1);
+.placement-modal-content.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .placement-modal-close {
@@ -458,50 +464,6 @@ button {
 }
 
 /* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-}
-
 @keyframes slideIn {
   from {
     transform: translateX(100%);

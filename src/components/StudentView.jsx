@@ -12,7 +12,7 @@
  * @module StudentView
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera, ExternalLink, Loader } from 'lucide-react';
@@ -30,12 +30,15 @@ export default function StudentView() {
     const [notification, setNotification] = useState(null);
     const [selectedPlacement, setSelectedPlacement] = useState(null);
     const [expandedPlacement, setExpandedPlacement] = useState(null);
-    const [isClosing, setIsClosing] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [studentName, setStudentName] = useState('');
     const [isDriver, setIsDriver] = useState(false);
     const [passengerCapacity, setPassengerCapacity] = useState(4);
     const [latestGlobalNotif, setLatestGlobalNotif] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const openTimerRef = useRef(null);
+    const closeTimerRef = useRef(null);
 
     /**
      * Fetches the latest notification from the data service.
@@ -54,7 +57,11 @@ export default function StudentView() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         loadLatestNotification();
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            clearTimeout(openTimerRef.current);
+            clearTimeout(closeTimerRef.current);
+        };
     }, []);
 
     /**
@@ -64,17 +71,19 @@ export default function StudentView() {
      * @param {Object} placement - The placement object that was clicked.
      */
     const handleCardClick = (placement) => {
+        clearTimeout(closeTimerRef.current);
         setExpandedPlacement(placement);
+        openTimerRef.current = setTimeout(() => setIsVisible(true), 10);
     };
 
     /**
      * Closes the expanded placement modal with an animation.
      */
     const handleCloseModal = () => {
-        setIsClosing(true);
-        setTimeout(() => {
+        clearTimeout(openTimerRef.current);
+        setIsVisible(false);
+        closeTimerRef.current = setTimeout(() => {
             setExpandedPlacement(null);
-            setIsClosing(false);
         }, 300); // Match the fadeOut animation duration
     };
 
@@ -233,8 +242,8 @@ export default function StudentView() {
 
             {/* Expanded Modal */}
             {expandedPlacement && (
-                <div className={`placement-modal-overlay ${isClosing ? 'closing' : ''}`} onClick={handleCloseModal}>
-                    <div className={`placement-modal-content ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
+                <div className={`placement-modal-overlay ${isVisible ? 'visible' : ''}`} onClick={handleCloseModal}>
+                    <div className={`placement-modal-content ${isVisible ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
                         <button className="placement-modal-close" onClick={handleCloseModal}>
                             <X size={24} />
                         </button>
