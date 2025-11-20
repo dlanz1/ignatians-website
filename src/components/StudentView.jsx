@@ -420,6 +420,7 @@ export default function StudentView() {
                     position: 'fixed',
                     bottom: '2rem',
                     right: '2rem',
+                    maxWidth: 'calc(100% - 4rem)',
                     backgroundColor: notification.type === 'success' ? 'var(--color-navy)' : '#ef4444',
                     color: 'white',
                     padding: '1rem 2rem',
@@ -430,9 +431,11 @@ export default function StudentView() {
                     gap: '0.5rem',
                     animation: 'slideIn 0.3s ease-out',
                     zIndex: 1000
-                }}>
-                    {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                    {notification.message}
+                }} className="toast-notification">
+                    <span style={{ flexShrink: 0 }}>
+                        {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                    </span>
+                    <span>{notification.message}</span>
                 </div>
             )}
         </div>
