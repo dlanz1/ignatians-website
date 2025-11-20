@@ -1,3 +1,13 @@
+/**
+ * Firebase configuration and initialization module.
+ *
+ * This module initializes the Firebase application instance and exports the
+ * Firestore database, Authentication, and Google Auth Provider instances for use
+ * throughout the application.
+ *
+ * @module firebase
+ */
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
@@ -23,6 +33,24 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+/**
+ * The initialized Cloud Firestore instance.
+ * Used for database operations.
+ * @type {import("firebase/firestore").Firestore}
+ */
 export const db = getFirestore(app);
+
+/**
+ * The initialized Firebase Authentication instance.
+ * Used for user authentication.
+ * @type {import("firebase/auth").Auth}
+ */
 export const auth = getAuth(app);
+
+/**
+ * The Google Auth Provider instance.
+ * Used for Google Sign-In authentication flow.
+ * @type {import("firebase/auth").GoogleAuthProvider}
+ */
 export const googleProvider = new GoogleAuthProvider();

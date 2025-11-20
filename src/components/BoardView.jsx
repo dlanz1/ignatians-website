@@ -1,3 +1,17 @@
+/**
+ * Board management view component.
+ *
+ * This component provides the interface for board members to manage service placements.
+ * It allows authenticated users to:
+ * - View all placements and their current sign-ups.
+ * - Add new placements.
+ * - Edit existing placements (including capacity management).
+ * - Delete placements.
+ * - Authenticate via Email/Password or Google Sign-In.
+ *
+ * @module BoardView
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
@@ -6,6 +20,12 @@ import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChange
 import { Plus, Edit2, Trash2, LogOut, Save, X, Car, ArrowLeft, Loader } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
+/**
+ * The main BoardView component.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered BoardView component.
+ */
 export default function BoardView() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
@@ -16,8 +36,13 @@ export default function BoardView() {
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState(initialFormState());
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
+    /**
+     * returns the initial state for the placement form.
+     *
+     * @returns {Object} The initial form state object.
+     */
     function initialFormState() {
         return { name: '', description: '', day: '', time: '', capacity: 5, location: '' };
     }
@@ -32,15 +57,27 @@ export default function BoardView() {
 
     useEffect(() => {
         if (user) {
-            setIsLoading(true);
+            let mounted = true;
+
             const unsubscribe = dataService.subscribeToPlacements((data) => {
-                setPlacements(data);
-                setIsLoading(false);
+                if (mounted) {
+                    setPlacements(data);
+                    setIsLoading(false);
+                }
             });
-            return () => unsubscribe();
+
+            return () => {
+                mounted = false;
+                unsubscribe();
+            };
         }
     }, [user]);
 
+    /**
+     * Handles email/password login form submission.
+     *
+     * @param {Event} e - The form submission event.
+     */
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
@@ -50,6 +87,9 @@ export default function BoardView() {
         }
     };
 
+    /**
+     * Handles Google Sign-In.
+     */
     const handleGoogleLogin = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
@@ -58,6 +98,9 @@ export default function BoardView() {
         }
     };
 
+    /**
+     * Handles user logout.
+     */
     const handleLogout = async () => {
         try {
             await signOut(auth);
@@ -67,6 +110,12 @@ export default function BoardView() {
         }
     };
 
+    /**
+     * Handles saving a placement (create or update).
+     * Checks for capacity reduction warnings before saving updates.
+     *
+     * @param {Event} e - The form submission event.
+     */
     const handleSave = async (e) => {
         e.preventDefault();
 
@@ -92,12 +141,23 @@ export default function BoardView() {
         }
     };
 
+    /**
+     * Handles deleting a placement.
+     * Asks for confirmation before deletion.
+     *
+     * @param {string} id - The ID of the placement to delete.
+     */
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this placement?')) {
             await dataService.deletePlacement(id);
         }
     };
 
+    /**
+     * Opens the placement modal for adding or editing.
+     *
+     * @param {Object|null} [placement=null] - The placement object to edit, or null to add a new one.
+     */
     const openModal = (placement = null) => {
         if (placement) {
             setEditingId(placement.id);
@@ -109,6 +169,9 @@ export default function BoardView() {
         setIsModalOpen(true);
     };
 
+    /**
+     * Closes the placement modal and resets the form state.
+     */
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingId(null);

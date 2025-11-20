@@ -1,9 +1,29 @@
+/**
+ * Student view component.
+ *
+ * This component provides the interface for students to view and sign up for service placements.
+ * It features:
+ * - A list of available placements.
+ * - Real-time updates of sign-ups.
+ * - Detailed view of each placement.
+ * - Sign-up functionality with driver and passenger capacity options.
+ * - Display of global notifications.
+ *
+ * @module StudentView
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { Calendar, MapPin, Users, Car, CheckCircle, AlertCircle, Bell, X, Lock, Camera, ExternalLink, Loader } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
+/**
+ * The main StudentView component.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered StudentView component.
+ */
 export default function StudentView() {
     const navigate = useNavigate();
     const [placements, setPlacements] = useState([]);
@@ -17,26 +37,39 @@ export default function StudentView() {
     const [latestGlobalNotif, setLatestGlobalNotif] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const unsubscribe = dataService.subscribeToPlacements((data) => {
-            setPlacements(data);
-            setIsLoading(false);
-        });
-        loadLatestNotification();
-        return () => unsubscribe();
-    }, []);
-
-    // Removed loadPlacements as it is no longer needed with subscription
-
+    /**
+     * Fetches the latest notification from the data service.
+     */
     const loadLatestNotification = async () => {
         const notif = await dataService.getLatestNotification();
         setLatestGlobalNotif(notif);
     };
 
+    useEffect(() => {
+        const unsubscribe = dataService.subscribeToPlacements((data) => {
+            setPlacements(data);
+            setIsLoading(false);
+        });
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadLatestNotification();
+
+        return () => unsubscribe();
+    }, []);
+
+    /**
+     * Handles the click event on a placement card.
+     * Opens the detailed view for the selected placement.
+     *
+     * @param {Object} placement - The placement object that was clicked.
+     */
     const handleCardClick = (placement) => {
         setExpandedPlacement(placement);
     };
 
+    /**
+     * Closes the expanded placement modal with an animation.
+     */
     const handleCloseModal = () => {
         setIsClosing(true);
         setTimeout(() => {
@@ -45,6 +78,12 @@ export default function StudentView() {
         }, 300); // Match the fadeOut animation duration
     };
 
+    /**
+     * Prepares the sign-up modal for a specific placement.
+     * Resets the form fields.
+     *
+     * @param {Object} placement - The placement to sign up for.
+     */
     const handleSignUpClick = (placement) => {
         setSelectedPlacement(placement);
         setStudentName('');
@@ -53,6 +92,13 @@ export default function StudentView() {
         setPassengerCapacity(4);
     };
 
+    /**
+     * Submits the sign-up form.
+     * Calls the data service to register the student.
+     * Shows a success or error notification based on the result.
+     *
+     * @param {Event} e - The form submission event.
+     */
     const handleConfirmSignUp = async (e) => {
         e.preventDefault();
         if (!studentName.trim()) return;
@@ -69,6 +115,12 @@ export default function StudentView() {
         }
     };
 
+    /**
+     * Displays a temporary notification message.
+     *
+     * @param {string} type - The type of notification ('success' or 'error').
+     * @param {string} message - The message to display.
+     */
     const showNotification = (type, message) => {
         setNotification({ type, message });
         setTimeout(() => setNotification(null), 3000);

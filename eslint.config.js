@@ -1,3 +1,12 @@
+/**
+ * ESLint configuration file.
+ *
+ * This file configures ESLint for the project, extending recommended configurations
+ * for JavaScript, React Hooks, and React Refresh.
+ *
+ * @module eslint.config
+ */
+
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
