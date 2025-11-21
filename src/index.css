@@ -203,6 +203,29 @@ button {
   /* Always black text on gold for readability */
 }
 
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+.actions-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+}
+
 .grid {
   display: grid;
   gap: 1.5rem;

@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { auth, googleProvider } from '../firebase';
 import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { Plus, Edit2, Trash2, LogOut, Save, X, Car, ArrowLeft, Loader } from 'lucide-react';
+import { Plus, Edit2, Trash2, LogOut, Save, X, Car, ArrowLeft, Loader, MoreVertical } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
 /**
@@ -37,6 +37,7 @@ export default function BoardView() {
     const [formData, setFormData] = useState(initialFormState());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeMenu, setActiveMenu] = useState(null);
 
     /**
      * returns the initial state for the placement form.
@@ -288,7 +289,7 @@ export default function BoardView() {
                     </button>
                 </div>
 
-                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
                     {isLoading ? (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
                             <Loader className="spin" size={48} color="var(--color-maroon)" />
@@ -318,7 +319,7 @@ export default function BoardView() {
                                             </td>
                                             <td style={{ padding: '1rem', verticalAlign: 'top' }}>
                                                 <div style={{ marginBottom: '0.5rem' }}>
-                                                    <span className={`badge ${signedUpCount >= p.capacity ? 'badge-gold' : ''}`} style={{ backgroundColor: signedUpCount >= p.capacity ? 'var(--color-maroon)' : 'var(--color-gray-200)', color: signedUpCount >= p.capacity ? 'white' : 'inherit' }}>
+                                                    <span className={`badge ${signedUpCount >= p.capacity ? 'badge-gold' : ''}`} style={{ backgroundColor: signedUpCount >= p.capacity ? 'var(--color-maroon)' : 'var(--color-gray-200)', color: signedUpCount >= p.capacity ? 'white' : 'var(--color-gray-800)' }}>
                                                         {signedUpCount} / {p.capacity}
                                                     </span>
                                                 </div>
@@ -341,13 +342,53 @@ export default function BoardView() {
                                                 )}
                                             </td>
                                             <td style={{ padding: '1rem', verticalAlign: 'top' }}>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                {/* Desktop View */}
+                                                <div className="desktop-only actions-group">
                                                     <button onClick={() => openModal(p)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem' }}>
                                                         <Edit2 size={14} />
                                                     </button>
                                                     <button onClick={() => handleDelete(p.id)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', color: '#991b1b', borderColor: '#fecaca' }}>
                                                         <Trash2 size={14} />
                                                     </button>
+                                                </div>
+
+                                                {/* Mobile View */}
+                                                <div className="mobile-only" style={{ position: 'relative' }}>
+                                                    <button
+                                                        onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
+                                                        className="btn btn-outline"
+                                                        style={{ padding: '0.25rem' }}
+                                                    >
+                                                        <MoreVertical size={16} />
+                                                    </button>
+                                                    {activeMenu === p.id && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            right: 0,
+                                                            top: '100%',
+                                                            backgroundColor: 'var(--bg-card)',
+                                                            border: '1px solid var(--border-color)',
+                                                            borderRadius: '0.375rem',
+                                                            boxShadow: 'var(--shadow-lg)',
+                                                            zIndex: 10,
+                                                            minWidth: '120px'
+                                                        }}>
+                                                            <button
+                                                                onClick={() => { openModal(p); setActiveMenu(null); }}
+                                                                className="btn"
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)' }}
+                                                            >
+                                                                <Edit2 size={14} /> Edit
+                                                            </button>
+                                                            <button
+                                                                onClick={() => { handleDelete(p.id); setActiveMenu(null); }}
+                                                                className="btn"
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: '#991b1b' }}
+                                                            >
+                                                                <Trash2 size={14} /> Delete
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

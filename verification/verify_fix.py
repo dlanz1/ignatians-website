@@ -1,60 +1,56 @@
-from playwright.sync_api import sync_playwright, expect
-import time
 
-def verify_flicker_fix(page):
-    print("Navigating to home page...")
-    page.goto("http://localhost:5173")
+from playwright.sync_api import sync_playwright
+import os
 
-    # Wait for the placements to load
-    print("Waiting for placements to load...")
-    page.wait_for_selector(".placement-card-compact", timeout=10000)
-
-    # Get the first placement card
-    first_card = page.locator(".placement-card-compact").first
-
-    print("Attempting Scenario A: Click Open -> Click Close Immediately")
-
-    # Pre-locate the close button. It doesn't exist yet, so we define the locator.
-    close_button = page.locator(".placement-modal-close")
-    modal_content = page.locator(".placement-modal-content")
-
-    # Click to open
-    first_card.click()
-
-    # Immediately try to close.
-    # We assume the modal renders fast enough that the close button is clickable.
-    # If not, we might miss the 10ms window, but let's try.
-    close_button.click()
-
-    print("Close clicked. Waiting 100ms to check state...")
-    time.sleep(0.1)
-
-    # Check visibility.
-    # We expect the element to still be in DOM (because of 300ms close timer).
-    # If the fix works, it should NOT have "visible" class.
-    # If the bug exists, it might have "visible" class (because open timer fired late).
-
-    if modal_content.count() > 0:
-        is_visible_class = "visible" in modal_content.get_attribute("class")
-        print(f"Is visible class present? {is_visible_class}")
-
-        if is_visible_class:
-            print("BUG DETECTED: Modal has 'visible' class after immediate close!")
-        else:
-            print("SUCCESS: Modal does not have 'visible' class.")
-    else:
-        print("Element already removed from DOM (Timer fired early or close click delayed).")
-
-    page.screenshot(path="verification/verification.png")
-
-if __name__ == "__main__":
+def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        try:
-            verify_flicker_fix(page)
-        except Exception as e:
-            print(f"Error: {e}")
-            page.screenshot(path="verification/error.png")
-        finally:
-            browser.close()
+
+        # iPhone 12 viewport
+        context = browser.new_context(
+            viewport={'width': 390, 'height': 844},
+            user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1',
+            color_scheme='dark' # Force dark mode
+        )
+
+        page = context.new_page()
+
+        # Navigate to board view
+        page.goto("http://localhost:5173/board")
+
+        # Wait for table
+        page.wait_for_selector('table')
+
+        # 1. Take screenshot of initial state (Dark Mode + Action Menu Button)
+        os.makedirs('verification', exist_ok=True)
+        page.screenshot(path="verification/mobile_fix_dark.png")
+        print("Screenshot captured at verification/mobile_fix_dark.png")
+
+        # 2. Click the menu button on the first row
+        # Find the first row's menu button. It should be visible in mobile view.
+        # The class is .mobile-only inside the td.
+        # We can target the MoreVertical icon's parent button.
+
+        # Wait for a bit for any layout shifts
+        page.wait_for_timeout(500)
+
+        # Click the first "more" button
+        buttons = page.locator("table tbody tr:first-child button:has(svg)").all()
+        # The first button in the actions column for mobile
+        # The actions column is the last td.
+        # Let's locate specifically.
+
+        menu_btn = page.locator("table tbody tr:first-child td:last-child .mobile-only button")
+        menu_btn.click()
+
+        # Wait for menu to appear
+        page.wait_for_timeout(500)
+
+        # 3. Take screenshot with menu open
+        page.screenshot(path="verification/mobile_fix_menu_open.png")
+        print("Screenshot captured at verification/mobile_fix_menu_open.png")
+
+        browser.close()
+
+if __name__ == "__main__":
+    run()
