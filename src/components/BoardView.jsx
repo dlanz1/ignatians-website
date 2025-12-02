@@ -12,7 +12,7 @@
  * @module BoardView
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { auth, googleProvider } from '../firebase';
@@ -38,7 +38,6 @@ export default function BoardView() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [activeMenu, setActiveMenu] = useState(null);
-    const menuRef = useRef(null);
 
     /**
      * Handles keyboard navigation and Escape key for the dropdown menu.
@@ -55,7 +54,9 @@ export default function BoardView() {
         if (activeMenu === null) return;
 
         const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+            // Check if click is inside any dropdown menu container
+            const menuContainer = document.querySelector(`[data-menu-id="${activeMenu}"]`);
+            if (menuContainer && !menuContainer.contains(event.target)) {
                 setActiveMenu(null);
             }
         };
@@ -383,7 +384,7 @@ export default function BoardView() {
                                                 </div>
 
                                                 {/* Mobile View */}
-                                                <div className="mobile-only" style={{ position: 'relative' }} ref={activeMenu === p.id ? menuRef : null}>
+                                                <div className="mobile-only" style={{ position: 'relative' }} data-menu-id={p.id}>
                                                     <button
                                                         onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
                                                         className="btn btn-outline"
