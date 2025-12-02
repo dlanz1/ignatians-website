@@ -35,7 +35,6 @@ def run():
         page.wait_for_timeout(500)
 
         # Click the first "more" button
-        buttons = page.locator("table tbody tr:first-child button:has(svg)").all()
         # The first button in the actions column for mobile
         # The actions column is the last td.
         # Let's locate specifically.
