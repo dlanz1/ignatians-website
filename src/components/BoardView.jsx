@@ -376,14 +376,14 @@ export default function BoardView() {
                                                             <button
                                                                 onClick={() => { openModal(p); setActiveMenu(null); }}
                                                                 className="btn"
-                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)' }}
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)', gap: '0.5rem' }}
                                                             >
                                                                 <Edit2 size={14} /> Edit
                                                             </button>
                                                             <button
                                                                 onClick={() => { handleDelete(p.id); setActiveMenu(null); }}
                                                                 className="btn"
-                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: '#991b1b' }}
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: '#991b1b', gap: '0.5rem' }}
                                                             >
                                                                 <Trash2 size={14} /> Delete
                                                             </button>
