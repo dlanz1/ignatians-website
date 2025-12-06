@@ -12,7 +12,7 @@
  * @module BoardView
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { auth, googleProvider } from '../firebase';
@@ -39,6 +39,37 @@ export default function BoardView() {
     const [isLoading, setIsLoading] = useState(true);
     const [activeMenu, setActiveMenu] = useState(null);
     const menuRef = useRef(null);
+
+    /**
+     * Handles keyboard navigation and Escape key for the dropdown menu.
+     * @param {KeyboardEvent} e - The keyboard event.
+     */
+    const handleMenuKeyDown = useCallback((e) => {
+        if (e.key === 'Escape') {
+            setActiveMenu(null);
+        }
+    }, [setActiveMenu]);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        if (activeMenu === null) return;
+
+        const handleClickOutside = (event) => {
+            // Check if click is inside any dropdown menu container
+            const menuContainer = document.querySelector(`[data-menu-id="${activeMenu}"]`);
+            if (menuContainer && !menuContainer.contains(event.target)) {
+                setActiveMenu(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleMenuKeyDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleMenuKeyDown);
+        };
+    }, [activeMenu, handleMenuKeyDown]);
 
     /**
      * returns the initial state for the placement form.
@@ -368,37 +399,46 @@ export default function BoardView() {
                                                 </div>
 
                                                 {/* Mobile View */}
-                                                <div className="mobile-only" style={{ position: 'relative' }} ref={activeMenu === p.id ? menuRef : null}>
+                                                <div className="mobile-only" style={{ position: 'relative' }} data-menu-id={p.id}>
                                                     <button
                                                         onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
                                                         className="btn btn-outline"
                                                         style={{ padding: '0.25rem' }}
+                                                        aria-expanded={activeMenu === p.id}
+                                                        aria-haspopup="menu"
+                                                        aria-label="Actions menu"
                                                     >
                                                         <MoreVertical size={16} />
                                                     </button>
                                                     {activeMenu === p.id && (
-                                                        <div style={{
-                                                            position: 'absolute',
-                                                            right: 0,
-                                                            top: '100%',
-                                                            backgroundColor: 'var(--bg-card)',
-                                                            border: '1px solid var(--border-color)',
-                                                            borderRadius: '0.375rem',
-                                                            boxShadow: 'var(--shadow-lg)',
-                                                            zIndex: 10,
-                                                            minWidth: '120px'
-                                                        }}>
+                                                        <div
+                                                            role="menu"
+                                                            aria-orientation="vertical"
+                                                            style={{
+                                                                position: 'absolute',
+                                                                right: 0,
+                                                                top: '100%',
+                                                                backgroundColor: 'var(--bg-card)',
+                                                                border: '1px solid var(--border-color)',
+                                                                borderRadius: '0.375rem',
+                                                                boxShadow: 'var(--shadow-lg)',
+                                                                zIndex: 10,
+                                                                minWidth: '120px'
+                                                            }}
+                                                        >
                                                             <button
                                                                 onClick={() => { openModal(p); setActiveMenu(null); }}
                                                                 className="btn"
-                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)' }}
+                                                                role="menuitem"
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)', gap: '0.5rem' }}
                                                             >
                                                                 <Edit2 size={14} /> Edit
                                                             </button>
                                                             <button
                                                                 onClick={() => { handleDelete(p.id); setActiveMenu(null); }}
                                                                 className="btn"
-                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--color-danger)', gap: '0.5rem' }}
+                                                                role="menuitem"
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: '#991b1b', gap: '0.5rem' }}
                                                             >
                                                                 <Trash2 size={14} /> Delete
                                                             </button>
