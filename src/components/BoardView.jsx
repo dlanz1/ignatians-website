@@ -12,7 +12,7 @@
  * @module BoardView
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { auth, googleProvider } from '../firebase';
@@ -38,6 +38,7 @@ export default function BoardView() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [activeMenu, setActiveMenu] = useState(null);
+    const menuRef = useRef(null);
 
     /**
      * returns the initial state for the placement form.
@@ -73,6 +74,20 @@ export default function BoardView() {
             };
         }
     }, [user]);
+
+    // Close mobile dropdown menu when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setActiveMenu(null);
+            }
+        }
+
+        if (activeMenu !== null) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [activeMenu]);
 
     /**
      * Handles email/password login form submission.
@@ -353,7 +368,7 @@ export default function BoardView() {
                                                 </div>
 
                                                 {/* Mobile View */}
-                                                <div className="mobile-only" style={{ position: 'relative' }}>
+                                                <div className="mobile-only" style={{ position: 'relative' }} ref={activeMenu === p.id ? menuRef : null}>
                                                     <button
                                                         onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
                                                         className="btn btn-outline"
