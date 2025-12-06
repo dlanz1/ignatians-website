@@ -378,7 +378,7 @@ export default function BoardView() {
                                                     <button onClick={() => openModal(p)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem' }}>
                                                         <Edit2 size={14} />
                                                     </button>
-                                                    <button onClick={() => handleDelete(p.id)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', color: '#991b1b', borderColor: '#fecaca' }}>
+                                                    <button onClick={() => handleDelete(p.id)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', color: 'var(--color-danger)', borderColor: 'var(--color-danger-light)' }}>
                                                         <Trash2 size={14} />
                                                     </button>
                                                 </div>

@@ -7,6 +7,10 @@
   --color-gold: #FDB913;
   --color-gold-dim: #e0a410;
 
+  /* Danger/Error Colors */
+  --color-danger: #991b1b;
+  --color-danger-light: #fecaca;
+
   /* Grays */
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
@@ -71,6 +75,10 @@
     /* lighter blue (blue-400) for better contrast */
     --color-gold: #fbbf24;
     /* amber-400 */
+    --color-danger: #f87171;
+    /* red-400 for better contrast on dark backgrounds */
+    --color-danger-light: #7f1d1d;
+    /* red-900 as border color for dark mode */
   }
 }
 
