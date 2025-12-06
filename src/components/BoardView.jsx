@@ -376,7 +376,7 @@ export default function BoardView() {
                                                             <button
                                                                 onClick={() => { openModal(p); setActiveMenu(null); }}
                                                                 className="btn"
-                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)', gap: '0.5rem' }}
+                                                                style={{ display: 'flex', width: '100%', textAlign: 'left', padding: '0.5rem 1rem', background: 'none', color: 'var(--text-main)' }}
                                                             >
                                                                 <Edit2 size={14} /> Edit
                                                             </button>
